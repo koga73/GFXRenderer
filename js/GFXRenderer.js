@@ -41,11 +41,10 @@ var GFXRenderer = (function(params){
 	
 	var _methods = {
 		init:function(){
-			var canvas = document.createElement("canvas");
-            canvas.setAttribute("class", "canvas-renderer");
-            var body = document.getElementsByTagName("body")[0];
-            body.insertBefore(canvas, body.firstChild);
-            _instance.canvas = canvas;
+            var canvas = _instance.canvas;
+            if (!canvas){
+                throw "Canvas does not exist.";
+            }
             
             var contextType = _instance.contextType;
             var context = canvas.getContext(contextType);
@@ -94,12 +93,6 @@ var GFXRenderer = (function(params){
             var context = _instance.context;
             if (context){
                 _instance.context = null;
-            }
-            
-            var canvas = _instance.canvas;
-            if (canvas){
-                canvas.parentElement.removeChild(canvas);
-                _instance.canvas = null;
             }
 		},
 		
