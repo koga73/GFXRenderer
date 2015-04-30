@@ -1,5 +1,5 @@
 /*
-* GFXRenderer v1.0.0 Copyright (c) 2015 AJ Savino
+* GFXRenderer v1.0.1 Copyright (c) 2015 AJ Savino
 * 
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -59,8 +59,8 @@ var GFXRenderer = (function(params){
 			} else if (window.attachEvent){
 				window.attachEvent("on" + resizeEvent, _methods._handler_resize);
 			}
-			_methods._resize();
-			
+			_methods._updateSize();
+            
 			_vars._normalTimer = new NormalTimer();
 			if ("requestAnimationFrame" in window){
 				requestAnimationFrame(_methods._render);
@@ -124,14 +124,17 @@ var GFXRenderer = (function(params){
 		},
 		
 		_resize:function(){
-			var canvas = _instance.canvas;
-			canvas.width = canvas.clientWidth;
-			canvas.height = canvas.clientHeight;
-            
+			_methods._updateSize();
             if (_instance.resize){
                 _instance.resize();
             }
-		}
+		},
+        
+        _updateSize:function(){
+            var canvas = _instance.canvas;
+			canvas.width = canvas.clientWidth;
+			canvas.height = canvas.clientHeight;
+        }
 	};
 	
 	_instance = {
@@ -161,12 +164,11 @@ var GFXRenderer = (function(params){
 });
 
 /*
-* NormalTimer v1.0.0 Copyright (c) 2014 AJ Savino
+* NormalTimer v1.0.1 Copyright (c) 2014 AJ Savino
 * MIT LICENSE
 */
 var NormalTimer = function(){
 	var _vars = {
-		_elapsed:0,
 		_delta:0,
 		_lastTime:0,
 		_startTime:new Date().getTime()
@@ -175,7 +177,7 @@ var NormalTimer = function(){
 	
 	var _methods = {
 		elapsed:function(){ //Getter
-			return _vars._elapsed;
+            return (new Date().getTime() - _vars._startTime) * 0.001;
 		},
 
 		delta:function(){ //Getter
@@ -184,7 +186,6 @@ var NormalTimer = function(){
 
 		tick:function(){
 			var currentTime = new Date().getTime();
-			_vars._elapsed = (currentTime - _vars._startTime) * 0.001;
 			_vars._delta = (currentTime - _vars._lastTime) * 0.001;
 			_vars._lastTime = currentTime;
 			return _vars._delta;
