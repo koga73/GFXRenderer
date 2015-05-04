@@ -1,5 +1,5 @@
 /*
-* GFXRenderer v1.0.1 Copyright (c) 2015 AJ Savino
+* GFXRenderer v1.0.2 Copyright (c) 2015 AJ Savino
 * 
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -105,7 +105,7 @@ var GFXRenderer = (function(params){
 			if (!_instance.paused && delta < 1){ //As to not "jump" when returning to page
                 _instance.render(delta);
 			}
-			if (!_vars.renderTimer){
+			if (!_vars._renderInterval){
 				requestAnimationFrame(_methods._render);
 			}
 		},
