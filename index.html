@@ -36,13 +36,13 @@
             
             var gfx = new GFXRenderer({
                 canvas:document.getElementById("gfxRenderer")
-                /*render:function(delta){},
-                resize:function(){},
+                /*onRender:function(delta){},
+                onResize:function(){},
                 paused:true*/
             });
             
             //Required function
-            gfx.render = function(delta){
+            gfx.onRender = function(delta){
                 var canvas = gfx.canvas;
                 var context = gfx.context;
                 
@@ -69,7 +69,7 @@
             };
             
             //Optional function
-            gfx.resize = function(){
+            gfx.onResize = function(){
                 console.log("resize");
             };
         </script>

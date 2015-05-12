@@ -1,5 +1,5 @@
 /*
-* GFXRenderer v1.0.2 Copyright (c) 2015 AJ Savino
+* GFXRenderer v1.0.3 Copyright (c) 2015 AJ Savino
 * 
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,7 @@ var GFXRenderer = (function(params){
 	var _instance = null;
 	
 	var _consts = {
-		FPS:60, //Used when requestAnimationFrame doesn't exist
-		RESIZE_TIMEOUT:250
+		FPS:60 //Used when requestAnimationFrame doesn't exist
 	};
 	
 	var _vars = {
@@ -34,7 +33,7 @@ var GFXRenderer = (function(params){
 		context:null,
         paused:false,
 		
-		_resizeTimeout:null,
+        _resizer:null,
 		_renderInterval:null,
 		_normalTimer:null
 	};
@@ -53,12 +52,9 @@ var GFXRenderer = (function(params){
             }
             _instance.context = context;
 			
-			var resizeEvent = ("onorientationchange" in window) ? "orientationchange" : "resize";
-			if (window.addEventListener){
-				window.addEventListener(resizeEvent, _methods._handler_resize, false);
-			} else if (window.attachEvent){
-				window.attachEvent("on" + resizeEvent, _methods._handler_resize);
-			}
+			_vars._resizer = new Resizer({
+                onResize:_methods._resize
+            });
 			_methods._updateSize();
             
 			_vars._normalTimer = new NormalTimer();
@@ -78,17 +74,11 @@ var GFXRenderer = (function(params){
                 _vars._renderInterval = null;
             }
             
-            var resizeTimeout = _vars._resizeTimeout;
-            if (resizeTimeout){
-                clearTimeout(resizeTimeout);
-                _vars._resizeTimeout = null;
+            var resizer = _vars._resizer;
+            if (resizer){
+                resizer.destroy();
+                _vars._resizer = null;
             }
-            var resizeEvent = ("onorientationchange" in window) ? "orientationchange" : "resize";
-			if (window.removeEventListener){
-				window.removeEventListener(resizeEvent, _methods._handler_resize);
-			} else if (window.detachEvent){
-				window.detachEvent("on" + resizeEvent, _methods._handler_resize);
-			}
             
             var context = _instance.context;
             if (context){
@@ -103,30 +93,17 @@ var GFXRenderer = (function(params){
             }
 			var delta = normalTimer.tick();
 			if (!_instance.paused && delta < 1){ //As to not "jump" when returning to page
-                _instance.render(delta);
+                _instance.onRender(delta);
 			}
 			if (!_vars._renderInterval){
 				requestAnimationFrame(_methods._render);
 			}
 		},
 		
-		_handler_resize:function(){
-			var timeout = _vars._resizeTimeout;
-			if (timeout){
-				clearTimeout(timeout);
-				_vars._resizeTimeout = null;
-			}
-			_vars._resizeTimeout = setTimeout(function(){
-				clearTimeout(timeout);
-				_vars._resizeTimeout = null;
-				_methods._resize();
-			}, _consts.RESIZE_TIMEOUT);
-		},
-		
 		_resize:function(){
 			_methods._updateSize();
-            if (_instance.resize){
-                _instance.resize();
+            if (_instance.onResize){
+                _instance.onResize();
             }
 		},
         
@@ -153,8 +130,8 @@ var GFXRenderer = (function(params){
 		
 		init:_methods.init,
 		destroy:_methods.destroy,
-        render:null,
-        resize:null
+        onRender:null,
+        onResize:null
 	};
     for (var prop in params){
         _instance[prop] = params[prop];
@@ -164,7 +141,7 @@ var GFXRenderer = (function(params){
 });
 
 /*
-* NormalTimer v1.0.1 Copyright (c) 2014 AJ Savino
+* NormalTimer v1.0.1 Copyright (c) 2015 AJ Savino
 * MIT LICENSE
 */
 var NormalTimer = function(){
@@ -197,4 +174,80 @@ var NormalTimer = function(){
 		delta:_methods.delta,
 		tick:_methods.tick
 	};
+};
+
+/*
+* Resizer v1.0.0 Copyright (c) 2015 AJ Savino
+* MIT LICENSE
+*/
+var Resizer = function(params){
+    var _instance = null;
+	
+    var _vars = {
+        callbackDelay:300,      //Time in ms to wait before calling onResize
+        
+        _resizeEvent:("onorientationchange" in window) ? "orientationchange" : "resize",
+        _timeout:null,
+	};
+    
+    var _methods = {
+        init:function(){
+			if (window.addEventListener){
+				window.addEventListener(_vars._resizeEvent, _methods._handler_resize, false);
+			} else if (window.attachEvent){
+				window.attachEvent("on" + _vars._resizeEvent, _methods._handler_resize);
+			}
+        },
+        
+        destroy:function(){
+            var timeout = _vars._timeout;
+			if (timeout){
+				clearTimeout(timeout);
+				_vars._timeout = null;
+			}
+            _instance.onResize = null;
+            
+            if (window.removeEventListener){
+				window.removeEventListener(_vars._resizeEvent, _methods._handler_resize);
+			} else if (window.detachEvent){
+				window.detachEvent("on" + _vars._resizeEvent, _methods._handler_resize);
+			}
+        },
+        
+        getWidth:function(){
+            return window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        },
+        
+        getHeight:function(){
+            return window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+        },
+        
+        _handler_resize:function(){
+			var timeout = _vars._timeout;
+			if (timeout){
+				clearTimeout(timeout);
+				_vars._timeout = null;
+			}
+			_vars._timeout = setTimeout(function(){
+				clearTimeout(timeout);
+				_vars._timeout = null;
+                _instance.onResize(_instance.getWidth(), _instance.getHeight());
+			}, _instance.callbackDelay);
+		}
+    };
+    
+    _instance = {
+        callbackDelay:_vars.callbackDelay,
+        
+        init:_methods.init,
+        destroy:_methods.destroy,
+        getWidth:_methods.getWidth,
+        getHeight:_methods.getHeight,
+        onResize:null
+    };
+    for (var param in params){
+        _instance[param] = params[param];
+    }
+    _instance.init();
+    return _instance;
 };
