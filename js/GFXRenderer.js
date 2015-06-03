@@ -1,5 +1,5 @@
 /*
-* GFXRenderer v1.0.3 Copyright (c) 2015 AJ Savino
+* GFXRenderer v1.0.4 Copyright (c) 2015 AJ Savino
 * 
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -177,7 +177,7 @@ var NormalTimer = function(){
 };
 
 /*
-* Resizer v1.0.0 Copyright (c) 2015 AJ Savino
+* Resizer v1.0.1 Copyright (c) 2015 AJ Savino
 * MIT LICENSE
 */
 var Resizer = function(params){
@@ -186,16 +186,18 @@ var Resizer = function(params){
     var _vars = {
         callbackDelay:300,      //Time in ms to wait before calling onResize
         
-        _resizeEvent:("onorientationchange" in window) ? "orientationchange" : "resize",
+        _lastOrientation:window.orientation,
         _timeout:null,
 	};
     
     var _methods = {
         init:function(){
 			if (window.addEventListener){
-				window.addEventListener(_vars._resizeEvent, _methods._handler_resize, false);
+				window.addEventListener("resize", _methods._handler_resize, false);
+				window.addEventListener("orientationchange", _methods._handler_resize, false);
 			} else if (window.attachEvent){
-				window.attachEvent("on" + _vars._resizeEvent, _methods._handler_resize);
+				window.attachEvent("onresize", _methods._handler_resize);
+				window.attachEvent("onorientationchange", _methods._handler_resize);
 			}
         },
         
@@ -208,9 +210,11 @@ var Resizer = function(params){
             _instance.onResize = null;
             
             if (window.removeEventListener){
-				window.removeEventListener(_vars._resizeEvent, _methods._handler_resize);
+				window.removeEventListener("resize", _methods._handler_resize);
+				window.removeEventListener("orientationchange", _methods._handler_resize);
 			} else if (window.detachEvent){
-				window.detachEvent("on" + _vars._resizeEvent, _methods._handler_resize);
+				window.detachEvent("onresize", _methods._handler_resize);
+				window.detachEvent("onorientationchange", _methods._handler_resize);
 			}
         },
         
@@ -223,6 +227,14 @@ var Resizer = function(params){
         },
         
         _handler_resize:function(){
+            if ("onorientationchange" in window){
+                var orientation = window.orientation;
+                if (orientation != _vars._lastOrientation){
+                    _vars._lastOrientation = orientation;
+                } else {
+                    return;
+                }
+            }
 			var timeout = _vars._timeout;
 			if (timeout){
 				clearTimeout(timeout);
