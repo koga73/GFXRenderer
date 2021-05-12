@@ -1,0 +1,29 @@
+{
+  "name": "gfx-renderer",
+  "version": "2.0.0",
+  "description": "Provides boilerplate rendering code for canvas graphics",
+  "main": "gfx-renderer.min.js",
+  "module": "gfx-renderer.esm.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koga73/gfx-renderer.git"
+  },
+  "keywords": [
+    "gfx",
+    "graphics",
+    "render"
+  ],
+  "author": "AJ Savino",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/koga73/gfx-renderer/issues"
+  },
+  "homepage": "https://github.com/koga73/gfx-renderer#readme",
+  "dependencies": {
+    "normal-timer": "^2.0.0",
+    "resize-notifier": "^2.0.0"
+  }
+}
